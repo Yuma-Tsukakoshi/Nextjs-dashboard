@@ -12,3 +12,6 @@ export default function RootLayout({
     </html>
   );
 }
+
+
+// ここのレイアウトファイルは全てのページに適用される ⇒ レイアウトの大本
