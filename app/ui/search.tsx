@@ -14,16 +14,18 @@ export default function Search({ placeholder }: { placeholder: string }) {
   // pathを動的に変更可能
   const { replace } = useRouter();
 
-  // handlesearchをwrappingしてdebounceする
+  // handlesearchをwrappingしてdebounceする ⇒ 300ms間隔でhandlesearchを実行
   const handleSearch = useDebouncedCallback((term) => {
     console.log(`Searching... ${term}`);
     const params = new URLSearchParams(searchParams);
-  
+    // 辞書型のように要素を追加 {page: '1'}
+      params.set('page', '1');
       if (term) {
         params.set('query', term);
       } else {
         params.delete('query');
       }
+      // pathnameにparamsを連結してURLを作成
       replace(`${pathname}?${params.toString()}`);
     },300);
 
