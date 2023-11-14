@@ -15,6 +15,7 @@ const FormSchema = z.object({
   date: z.string(),
 });
 
+// omit : 特定のカラムの型制約を除外する
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
