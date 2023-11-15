@@ -8,10 +8,17 @@ import { redirect } from 'next/navigation';
 
 const FormSchema = z.object({
   id: z.string(),
-  customerId: z.string(),
-  amount: z.coerce.number(),
+  customerId: z.string({
+    invalid_type_error: 'Please select a customer.',
+  }),
+  amount: z.coerce
+  .number()
+  // numberに加えての「かつ」条件
+  .gt(0,{ message: 'Please enter an amount greater than $0.' }),
   // coerce : (change) from a string to a numbe
-  status: z.enum(['pending', 'paid']),
+  status: z.enum(['pending', 'paid'], {
+    invalid_type_error: 'Please select an invoice status.',
+  }),
   date: z.string(),
 });
 
@@ -19,12 +26,40 @@ const FormSchema = z.object({
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function createInvoices(formData:FormData) {
-  const { customerId, amount, status } = CreateInvoice.parse({
+// 必ず存在するとは限らない値を扱う場合に?を使用する
+export type State = {
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
+
+export async function createInvoices(prevState: State,formData:FormData) {
+  // safeParce: try-catchを用いずにvalidationのエラーを返してくれる
+  const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    return {
+      // flatten : オブジェクトに整形してエラー詳細を返す
+      /* 
+        {
+          formErrors: [],
+          fieldErrors: {
+            name: ["Expected string, received number"],
+            age: ["Expected number, received string"]
+          }
+        }
+      */
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Invoice.',
+    };
+  }
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0];
 
