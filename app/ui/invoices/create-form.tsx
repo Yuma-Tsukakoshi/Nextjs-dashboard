@@ -30,6 +30,10 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
               name="customerId"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
+              // HTML要素に関連するエラーメッセージを示すための属性です。
+              // この属性は、idがcustomer-errorである要素の内容を、aria-describedbyで指定された要素に関連付けます。
+              // つまり、この場合は、idがcustomer-errorである要素の内容が、aria-describedbyで指定された要素に表示されるエラーメッセージとして関連付けられています。
+              aria-describedby="customer-error"
             >
               <option value="" disabled>
                 Select a customer
@@ -42,6 +46,17 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
             </select>
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           </div>
+          {state.errors?.customerId ? (
+            <div
+              id="customer-error"
+              aria-live="polite"
+              className="mt-2 text-sm text-red-500"
+            >
+              {state.errors.customerId.map((error: string) => (
+                <p key={error}>{error}</p>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {/* Invoice Amount */}
